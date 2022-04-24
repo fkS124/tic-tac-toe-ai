@@ -15,7 +15,12 @@ class App:
         raise SystemExit
 
     def run(self):
+        self.display.fill((255, 255, 255))
+        self.game.draw_grid()
+        pg.display.update()
+
         while self.running:
+
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self._quit()

@@ -1,7 +1,12 @@
 import pygame as pg
+from typing import Union
 
 
 class Game:
+
+    # True = circle
+    # False = cross
+
     def __init__(self, screen: pg.Surface):
         self.tiles = [[2, 2, 2], [2, 2, 2], [2, 2, 2]]
         self.turn = True
@@ -10,35 +15,49 @@ class Game:
 
     def draw(self, r, c, color):
         if color != 2:
-            pg.draw.circle(self.screen, 'red' if color else 'blue',
-                           (self.size * (r + 0.5) / 3, self.size * (0.5 + c) / 3), self.size // 7)
+            print(color)
+            if color:
+                pg.draw.circle(self.screen, 'blue', (self.size * (r + 0.5) / 3, self.size * (0.5 + c) / 3),
+                               self.size // 9, width=5)
+            else:
+                pg.draw.line(self.screen, 'red', ((r + 0.2) * self.size / 3, (c + 0.2) * self.size / 3),
+                             ((r + 0.8) * self.size / 3, (c + 0.8) * self.size / 3), 5)
+                pg.draw.line(self.screen, 'red', ((r + 0.8) * self.size / 3, (c + 0.2) * self.size / 3),
+                             ((r + 0.2) * self.size / 3, (c + 0.8) * self.size / 3), 5)
 
     def end(self):
-        a = True
-        for i in range(3):
-            if self.tiles[i] == [True, True, True] or (self.tiles[0][i] and self.tiles[1][i] and self.tiles[0][i]):
-                return True, 'red'
-            elif self.tiles[i] == [False, False, False] or not (self.tiles[0][i] and self.tiles[1][i] and self.tiles[0][i]):
-                return True, 'blue'
-            for j in range(3):
-                if self.tiles[i][j] == 2:
-                    a = False
-        if (self.tiles[0][0] and self.tiles[1][1] and self.tiles[2][2]) or (
-                    self.tiles[0][2] and self.tiles[1][1] and self.tiles[2][0]):
-            return True, 'red'
-        if not (self.tiles[0][0] and self.tiles[1][1] and self.tiles[2][2]) or not (
-                    self.tiles[0][2] and self.tiles[1][1] and self.tiles[2][0]):
-            return True, 'blue'
-        if a:
-            return True, 'tie'
-        return False
+        output: dict[Union[bool, int], tuple[bool, str]] = {True: (True, "circle"), False: (True, "cross")}
+        keys = [[True, True, True], [False, False, False]]
+        for r in range(3):
+            if self.tiles[r] in keys:
+                return output[self.tiles[r][0]]
+        for c in range(3):
+            if (column := [self.tiles[i][c] for i in range(3)]) in keys:
+                return output[column[0]]
+        for diagonal in ([self.tiles[i][i] for i in range(3)], [self.tiles[i][2-i] for i in range(3)]):
+            if diagonal in keys:
+                return output[diagonal[0]]
+        if 2 not in [*self.tiles[0], *self.tiles[1], *self.tiles[2]]:
+            return True, "tie"
+        return False, "none"
+
+    def draw_grid(self):
+        for c in range(1, 3):
+            pg.draw.line(self.screen, (0, 0, 0), (c * self.size / 3, 0.03 * self.size),
+                         (c * self.size / 3, 0.97 * self.size), 2)
+        for r in range(1, 3):
+            pg.draw.line(self.screen, (0, 0, 0), (0.03 * self.size, r * self.size / 3),
+                         (0.97 * self.size, r * self.size / 3), 2)
 
     def update(self, x: tuple[int, int]):
-        self.tiles[x[0]][x[1]] = self.turn
+        self.draw_grid()
+        self.tiles[x[1]][x[0]] = self.turn
         for r in range(3):
             for c in range(3):
-                self.draw(r, c, self.tiles[r][c])
+                self.draw(c, r, self.tiles[r][c])
         self.turn = not self.turn
         if self.end()[0]:
-            print('end')
+            print(self.end(), 'end')
             self.tiles = [[2, 2, 2], [2, 2, 2], [2, 2, 2]]
+            self.screen.fill((255, 255, 255))
+            self.draw_grid()
