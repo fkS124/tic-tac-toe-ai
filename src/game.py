@@ -1,7 +1,6 @@
 import pygame as pg
 from typing import Union
 
-
 class Game:
 
     # True = circle
@@ -15,7 +14,6 @@ class Game:
 
     def draw(self, r, c, color):
         if color != 2:
-            print(color)
             if color:
                 pg.draw.circle(self.screen, 'blue', (self.size * (r + 0.5) / 3, self.size * (0.5 + c) / 3),
                                self.size // 9, width=5)
@@ -51,6 +49,7 @@ class Game:
 
     def update(self, x: tuple[int, int]):
         self.draw_grid()
+        print(self.tiles)
         if self.tiles[x[1]][x[0]] == 2:
             self.tiles[x[1]][x[0]] = self.turn
         else:
@@ -60,7 +59,8 @@ class Game:
                 self.draw(c, r, self.tiles[r][c])
         self.turn = not self.turn
         if self.end()[0]:
-            print(self.end(), 'end')
             self.tiles = [[2, 2, 2], [2, 2, 2], [2, 2, 2]]
             self.screen.fill((255, 255, 255))
             self.draw_grid()
+
+
