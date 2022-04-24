@@ -51,7 +51,10 @@ class Game:
 
     def update(self, x: tuple[int, int]):
         self.draw_grid()
-        self.tiles[x[1]][x[0]] = self.turn
+        if self.tiles[x[1]][x[0]] == 2:
+            self.tiles[x[1]][x[0]] = self.turn
+        else:
+            return
         for r in range(3):
             for c in range(3):
                 self.draw(c, r, self.tiles[r][c])
